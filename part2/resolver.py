@@ -19,9 +19,11 @@ s.bind(('127.0.0.1', MY_PORT))
 while True:
     data, client_addr = s.recvfrom(1024)
     received_string = data.decode('utf-8').strip()
-    
+    print(f"{received_string}")
+
     domain = received_string  
     isThere = False
+    response = None
 
     if domain in cache:
         response, expiration = cache[domain]
@@ -30,9 +32,7 @@ while True:
         else:
             del cache[domain]
 
-    if isThere:
-        s.sendto(response.encode(), client_addr)
-    else:
+    if not isThere:
         s.sendto(domain.encode(), (PARENT_IP, PARENT_PORT))
         
         data2, server_addr = s.recvfrom(1024)
@@ -40,5 +40,27 @@ while True:
         response = received_string2
         
         cache[domain] = (response, time.time() + x)
-        
+
+    while response.endswith("NS"):
+        print(f"{received_string2}")
+
+        parts = response.split(',')
+        ns_ip, ns_port = parts[1].split(':')
+        ns_port = int(ns_port)
+        s.sendto(domain.encode(), ('127.0.0.1', ns_port))
+        data2, server_addr = s.recvfrom(1024)
+        received_string2 = data2.decode('utf-8').strip() 
+        response = received_string2
+        cache[domain] = (response, time.time() + x)
+
+    print(f"{response}")
+
+    if response == "non-existent domain":
         s.sendto(response.encode(), client_addr)
+
+    elif response.endswith(",A"):
+        parts = response.split(',')
+        ip_only = parts[1]
+
+        cache[domain] = (ip_only, time.time() + x)
+        s.sendto(ip_only.encode(), client_addr)

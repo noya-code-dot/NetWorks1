@@ -43,19 +43,23 @@ def main():
     s.bind(('127.0.0.1', int(sys.argv[1])))
 
     while True:
-
+        found = False
         data, addr = s.recvfrom (1024)
         print(str(data), addr)
         for record in a_records:
             if record['address'].encode() == data:
                 response = f"{record['address']},{record['ip']},A"
                 s.sendto(response.encode(), addr)
+                found = True
                 break
         for record in ns_records:
             if data.endswith(record['address'].encode()):
                 response = f"{record['address']},{record['ip']}:{record['port']},NS"
                 s.sendto(response.encode(), addr)
+                found = True
                 break
+        if(found is not True):
+            s.sendto(b"non-existent domain", addr)
 
 if __name__ == "__main__":
     main()
