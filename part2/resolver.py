@@ -56,6 +56,7 @@ while True:
     print(f"{response}")
 
     if response == "non-existent domain":
+        cache[domain] = (response, time.time() + x)
         s.sendto(response.encode(), client_addr)
 
     elif response.endswith(",A"):
