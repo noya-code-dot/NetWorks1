@@ -8,14 +8,23 @@ if len(sys.argv) != 3:
 
 HOST = sys.argv[1]
 PORT = int(sys.argv[2])
-
-message = input()
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-s.sendto(message.encode('utf-8'), (HOST, PORT))
+try:
+    while True:
+        try:
+            message = input()
+        except EOFError:
+            break
+            
+        s.sendto(message.encode('utf-8'), (HOST, PORT))
 
-data, server_addr = s.recvfrom(1024)
+        data, server_addr = s.recvfrom(1024)
+        received_string = data.decode('utf-8')
+        print(f"{received_string}")
 
-received_string = data.decode('utf-8')
-print(f"{received_string}")
-s.close()
+except KeyboardInterrupt:
+    pass
+
+finally:
+     s.close()

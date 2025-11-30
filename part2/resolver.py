@@ -26,9 +26,10 @@ while True:
     response = None
 
     if domain in cache:
-        response, expiration = cache[domain]
+        cached_resp, expiration = cache[domain]
         if time.time() < expiration: 
-            isThere = True
+            s.sendto(cached_resp.encode(), client_addr)
+            continue 
         else:
             del cache[domain]
 
@@ -42,7 +43,7 @@ while True:
         cache[domain] = (response, time.time() + x)
 
     while response.endswith("NS"):
-        print(f"{received_string2}")
+        #print(f"{received_string2}")
 
         parts = response.split(',')
         ns_ip, ns_port = parts[1].split(':')
@@ -53,7 +54,7 @@ while True:
         response = received_string2
         cache[domain] = (response, time.time() + x)
 
-    print(f"{response}")
+    #print(f"{response}")
 
     if response == "non-existent domain":
         cache[domain] = (response, time.time() + x)

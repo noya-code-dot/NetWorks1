@@ -13,7 +13,6 @@ def main():
         try:
             address, ip_port_combo, record_type = line.split(',')
         except ValueError:
-            print(f"Skipping malformed line: {line}")
             continue
 
         ip = None
@@ -23,7 +22,6 @@ def main():
                 ip, port_str = ip_port_combo.split(':')
                 port = int(port_str)
             except ValueError:
-                print(f"Skipping line with invalid IP/port: {line}")
                 continue
         else:
             ip = ip_port_combo
@@ -33,7 +31,7 @@ def main():
             'ip': ip,
             'port': port
         }
-        print(f"Parsed record: {record_data}, Type: {record_type}")
+        #print(f"Parsed record: {record_data}, Type: {record_type}")
         if record_type == 'A':
             a_records.append(record_data)
         elif record_type == 'NS':
